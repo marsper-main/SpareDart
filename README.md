@@ -1,3 +1,15 @@
+Demo: https://marsper-main.github.io/SpareDart/
+
+SpareDart is the new environment where people can create "products", which are elements, objects, and is designed so that people who need a spare part of a "product", can find their product, and see the spare parts that
+
+buyPart: Pays the price indicated by the owner of the spare part, and reduces by 1 de amount of pieces availables
+createPart: Adds the part to the parts map, referenced by the "father" product index, also, with his own part index, adding this index to the products map
+createProduct: Adds the product to the products map, referneced by his own index 
+getPart: Gives the data of a part by his index
+getPartsLength: Gives the total amount of parts
+getProduct: Gives the data of a product by his index, included his "child" parts
+getProductsLength: Gives the total amount of products
+
 # Install
 
 ```
