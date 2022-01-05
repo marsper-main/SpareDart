@@ -1,3 +1,4 @@
+
 // SPDX-License-Identifier: MIT
 
 pragma solidity >=0.7.0 <0.9.0;
@@ -51,7 +52,13 @@ contract SparePart {
 
     mapping(uint256 => Part) internal parts;
 
+    modifier isPartOwner(uint part_id){
+        // a modifier that makes sure that only the owner of a part can access it
+        require(parts[part_id].owner == msg.sender);
+        _;
+    }
     function createProduct(
+        // create a new product
         string memory _name,
         string memory _image,
         string memory _description
@@ -121,7 +128,19 @@ contract SparePart {
         parts[_index].pieces--;
     }
 
+    function restockParts(uint part_id, uint extra) public isPartOwner(part_id) {
+        // allows the seller/creator of a part to restock it when it gets exhausted
+
+        parts[part_id].pieces += extra;
+    }
+
+    function updatePartsPrice(uint part_id, uint new_price) public isPartOwner(part_id) {
+        // update the price of a part 
+        parts[part_id].price = new_price;
+    }
+
     function getProductsLength() public view returns (uint256) {
+        // get the total lenght of products that currently exists on chain
         return (productsLength);
     }
 
