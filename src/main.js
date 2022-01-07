@@ -1,12 +1,10 @@
 import Web3 from "web3"
 import { newKitFromWeb3 } from "@celo/contractkit"
 import BigNumber from "bignumber.js"
-import marketplaceAbi from "../contract/marketplace.abi.json"
+import marketplaceAbi from "../contract/spacedart.abi.json"
 import erc20Abi from "../contract/erc20.abi.json"
+import {MPContractAddress, ERC20_DECIMALS, cUSDContractAddress} from "./utils/constants";
 
-const ERC20_DECIMALS = 18
-const MPContractAddress = "0xe6338f783735C36a6F413DFE7e70A628bf40619D"
-const cUSDContractAddress = "0x874069Fa1Eb16D44d622F2e0Ca25eeA172369bC1"
 
 let kit
 let contract
@@ -39,23 +37,23 @@ const connectCeloWallet = async function () {
 async function approve(_price) {
   const cUSDContract = new kit.web3.eth.Contract(erc20Abi, cUSDContractAddress)
 
-  const result = await cUSDContract.methods
+  return  await cUSDContract.methods
     .approve(MPContractAddress, _price)
     .send({ from: kit.defaultAccount })
-  return result
+
 }
 
 const getBalance = async function () {
   const totalBalance = await kit.getTotalBalance(kit.defaultAccount)
-  const cUSDBalance = totalBalance.cUSD.shiftedBy(-ERC20_DECIMALS).toFixed(2)
-  document.querySelector("#balance").textContent = cUSDBalance
+  document.querySelector("#balance").textContent = totalBalance.cUSD.shiftedBy(-ERC20_DECIMALS).toFixed(2)
+
 }
 
 const getProducts = async function() {
   const _productsLength = await contract.methods.getProductsLength().call()
   const _products = []
   for (let i = 0; i < _productsLength; i++) {
-    let _product = new Promise(async (resolve, reject) => {
+    let _product = new Promise(async (resolve) => {
       let p = await contract.methods.getProduct(i).call()
       resolve({
         index: i,
@@ -97,24 +95,6 @@ function productTemplate(_product) {
   `
 }
 
-function identiconTemplate(_address) {
-  const icon = blockies
-    .create({
-      seed: _address,
-      size: 8,
-      scale: 16,
-    })
-    .toDataURL()
-
-  return `
-  <div class="rounded-circle overflow-hidden d-inline-block border border-white border-2 shadow-sm m-0">
-    <a href="https://alfajores-blockscout.celo-testnet.org/address/${_address}/transactions"
-        target="_blank">
-        <img src="${icon}" width="48" alt="${_address}">
-    </a>
-  </div>
-  `
-}
 
 function notification(_text) {
   document.querySelector(".alert").style.display = "block"
@@ -135,7 +115,7 @@ window.addEventListener("load", async () => {
 
 document
   .querySelector("#newProductBtn")
-  .addEventListener("click", async (e) => {
+  .addEventListener("click", async () => {
     const params = [
       document.getElementById("newProductName").value,
       document.getElementById("newImgUrl").value,
@@ -143,7 +123,7 @@ document
     ]
     notification(`⌛ Adding "${params[0]}"...`)
     try {
-      const result = await contract.methods
+      await contract.methods
         .createProduct(...params)
         .send({ from: kit.defaultAccount })
     } catch (error) {
@@ -153,7 +133,7 @@ document
     getProducts()
   })
 
-document.querySelector("#newPartBtn").addEventListener("click", async (e) => {
+document.querySelector("#newPartBtn").addEventListener("click", async () => {
   console.log("newpart");
   const params = [
     document.getElementById("newPartName").value,
@@ -167,7 +147,7 @@ document.querySelector("#newPartBtn").addEventListener("click", async (e) => {
   
   notification(`⌛ Adding "${params[0]}"...`)
   try {
-    const result = await contract.methods
+     await contract.methods
       .createPart(...params)
       .send({ from: kit.defaultAccount })
   } catch (error) {
@@ -195,7 +175,7 @@ document.querySelector("#partsRender").addEventListener("click", async (e) => {
     notification(`⌛ Awaiting payment for "${found.name}"...`)
     try {
 
-      const result = await contract.methods
+      await contract.methods
         .buyPart(index)
         .send({ from: kit.defaultAccount })
       notification(`🎉 You successfully bought "${found.name}".`)

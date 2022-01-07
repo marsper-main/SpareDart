@@ -109,6 +109,7 @@ contract SparePart {
     }
 
     function buyPart(uint256 _index) public payable {
+        require(parts[index].owner != address(0), "Part does not exist");
         require(parts[_index].pieces > 0, "Sold Out");
         require(
             IERC20Token(cUsdTokenAddress).transferFrom(
